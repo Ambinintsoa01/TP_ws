@@ -1,0 +1,13 @@
+package com.apiEtudiant.exception;
+
+public enum ErrorCode {
+    STUDENT_NOT_FOUND,
+    INVALID_SEMESTER,
+    INVALID_LEVEL,
+    INVALID_REQUEST,
+    DATABASE_UNAVAILABLE,
+    AUTH_REQUIRED,
+    INVALID_CREDENTIALS,
+    USER_NOT_AUTHENTICATED,
+    UNEXPECTED_ERROR
+}
