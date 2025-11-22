@@ -5,32 +5,6 @@
     <p class="text-sm text-gray-500 mb-1">ID étudiant: {{ studentId }}</p>
     <p class="text-sm text-gray-700 font-medium mb-3">{{ studentName }}</p>
 
-    <div class="mb-4">
-      <h2 class="text-lg font-semibold mb-2">Moyennes par semestre</h2>
-      <div v-if="loadingAverages">Chargement des moyennes...</div>
-      <div v-else>
-        <table class="w-full table-auto border-collapse mb-2">
-          <thead>
-            <tr class="bg-gray-100">
-              <th class="p-2 text-left">Semestre</th>
-              <th class="p-2 text-right">Moyenne</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="s in ['S1','S2','S3','S4']" :key="s" class="border-t">
-              <td class="p-2">{{ s }}</td>
-              <td class="p-2 text-right font-semibold">{{ displayedAverages[s] == null ? '—' : displayedAverages[s] }}</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <div class="flex gap-4">
-          <button class="px-3 py-1 rounded bg-blue-600 text-white" @click="router.push({ name: 'student-notes-level', params: { id: studentId, level: 'L1' } })">L1 (S1+S2)</button>
-          <button class="px-3 py-1 rounded bg-blue-600 text-white" @click="router.push({ name: 'student-notes-level', params: { id: studentId, level: 'L2' } })">L2 (S3+S4)</button>
-        </div>
-      </div>
-    </div>
-
     <div v-if="isS4View" class="mb-4 p-4 bg-indigo-50 rounded border border-indigo-100">
       <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
@@ -101,24 +75,11 @@
 
     <div v-if="loading">Chargement des notes...</div>
 
-    <div v-else-if="!isS4View">
-      <div class="mb-4 flex flex-wrap gap-4 text-sm text-gray-700">
-        <div class="px-3 py-2 bg-gray-100 rounded-lg">
-          <span class="font-medium">Moyenne générale:</span>
-          <span class="ml-2 font-bold">{{ semesterAverageDisplay }}</span>
-        </div>
-        <div class="px-3 py-2 bg-gray-100 rounded-lg">
-          <span class="font-medium">Décision:</span>
-          <span class="ml-2 font-bold" :class="semesterDecision.decision === 'Admis' ? 'text-green-700' : 'text-red-700'">
-            {{ semesterDecision.decision }}
-          </span>
-        </div>
-      </div>
+    <div v-else-if="!isS4View" class="p-4 bg-white rounded border border-gray-100 shadow-sm">
       <div v-if="error" class="mb-4 p-3 bg-red-100 text-red-800 rounded">{{ error }} <button v-if="error && error.includes('Authentification')" class="ml-3 underline" @click="$router.push('/login')">Se connecter</button></div>
-      <table class="w-full table-auto border-collapse">
+      <table class="w-full table-auto border-collapse text-sm">
         <thead>
-          <tr class="bg-gray-100">
-            <th class="p-2 text-left">Code</th>
+          <tr class="bg-gray-50">
             <th class="p-2 text-left">Matière</th>
             <th class="p-2 text-left">Session</th>
             <th class="p-2 text-right">Crédits</th>
@@ -128,8 +89,10 @@
         </thead>
         <tbody>
           <tr v-for="note in notes" :key="note.gradeId" class="border-t">
-            <td class="p-2">{{ note.subjectCode }}</td>
-            <td class="p-2">{{ note.subjectTitle }}</td>
+            <td class="p-2">
+              <div class="font-medium text-gray-900">{{ note.subjectCode }}</div>
+              <div class="text-xs text-gray-500">{{ note.subjectTitle }}</div>
+            </td>
             <td class="p-2">{{ note.sessionDate || '—' }}</td>
             <td class="p-2 text-right">{{ formatSubjectCredits(note) }}</td>
             <td class="p-2 text-right font-semibold">{{ formatGrade(note.grade) }}</td>
@@ -137,20 +100,25 @@
           </tr>
         </tbody>
         <tfoot>
-          <tr class="border-t">
-            <td colspan="4" class="p-2 font-bold">Crédits capitalisés</td>
-            <td class="p-2 text-right font-bold">{{ semesterCreditsTotalDisplay }}</td>
+          <tr class="border-t bg-gray-50">
+            <td colspan="3" class="p-2 font-bold">Crédits capitalisés</td>
+            <td colspan="2" class="p-2 text-right font-bold">{{ semesterCreditsTotalDisplay }}</td>
           </tr>
-          <tr class="border-t">
-            <td colspan="4" class="p-2 font-bold">Moyenne</td>
-            <td class="p-2 text-right font-bold">{{ semesterAverageDisplay }}</td>
+          <tr class="border-t bg-gray-50">
+            <td colspan="3" class="p-2 font-bold">Moyenne</td>
+            <td colspan="2" class="p-2 text-right font-bold">{{ semesterAverageDisplay }}</td>
+          </tr>
+          <tr class="border-t bg-gray-50">
+            <td colspan="3" class="p-2 font-bold">Décision</td>
+            <td colspan="2" class="p-2 text-right font-bold" :class="semesterDecision.decision === 'Admis' ? 'text-green-700' : 'text-red-700'">
+              {{ semesterDecision.decision }}
+            </td>
           </tr>
         </tfoot>
       </table>
 
       <div v-if="notes.length === 0 && !error" class="mt-4 text-sm text-gray-500">Aucune note trouvée pour cet étudiant et ce semestre.</div>
     </div>
-    <div v-else-if="!selectedS4Option" class="text-sm text-gray-500">Sélectionnez une option pour consulter les notes de S4.</div>
   </div>
 </template>
 

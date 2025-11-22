@@ -8,6 +8,7 @@ import Login from "../views/Login.vue";
 import SemesterAverages from "../views/SemesterAverages.vue";
 import StudentGrades from "../views/StudentGrades.vue";
 import StudentLevelNotes from "../views/StudentLevelNotes.vue";
+import StudentProfile from "../views/StudentProfile.vue";
 import OptionS4 from "../views/OptionS4.vue";
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -18,6 +19,7 @@ const router = createRouter({
     { path: "/students", name: "students", component: Students },
     { path: "/semesters", name: "semesters", component: Semesters },
     { path: "/semesters/:label", name: "semester-averages", component: SemesterAverages, props: true },
+    { path: "/students/:id/profile", name: "student-profile", component: StudentProfile, props: true },
     { path: "/students/:id/notes/semesters/:semester", name: "student-notes-semester", component: StudentGrades, props: true },
     { path: "/students/:id/notes/levels/:level", name: "student-notes-level", component: StudentLevelNotes, props: true },
     { path: "/options", name: "options", component: OptionS4 },
