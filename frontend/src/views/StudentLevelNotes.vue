@@ -37,20 +37,13 @@
       <div
         v-for="block in semesters"
         :key="block.semesterCode"
-        class="mb-6"
+        class="mb-6 p-4 bg-white rounded border border-gray-100 shadow-sm"
         v-if="!shouldHideSemesterBlock(block)"
       >
         <h2 class="text-lg font-semibold mb-2">{{ block.semesterLabel || block.semesterCode }}</h2>
-        <div class="semester-summary" v-if="block.summary">
-          <div class="summary-pill">Moyenne: {{ getBlockAverage(block) }}</div>
-          <div class="summary-pill" :class="block.summary.decision === 'Admis' ? 'summary-pill-success' : 'summary-pill-danger'">
-            Décision: {{ block.summary.decision }}
-          </div>
-        </div>
-        <table class="w-full table-auto border-collapse mb-2">
+        <table class="w-full table-auto border-collapse mb-2 text-sm">
           <thead>
-            <tr class="bg-gray-100">
-              <th class="p-2 text-left">Code</th>
+            <tr class="bg-gray-50">
               <th class="p-2 text-left">Matière</th>
               <th class="p-2 text-left">Session</th>
               <th class="p-2 text-right">Crédits</th>
@@ -60,8 +53,10 @@
           </thead>
           <tbody>
             <tr v-for="note in block.notes" :key="note.gradeId" class="border-t">
-              <td class="p-2">{{ note.subjectCode }}</td>
-              <td class="p-2">{{ note.subjectTitle }}</td>
+              <td class="p-2">
+                <div class="font-medium text-gray-900">{{ note.subjectCode }}</div>
+                <div class="text-xs text-gray-500">{{ note.subjectTitle }}</div>
+              </td>
               <td class="p-2">{{ note.sessionDate || '—' }}</td>
               <td class="p-2 text-right">{{ getNoteCredits(block, note) }}</td>
               <td class="p-2 text-right font-semibold">{{ formatGrade(resolveDisplayGrade(note)) }}</td>
@@ -69,30 +64,28 @@
             </tr>
           </tbody>
           <tfoot>
-            <tr class="border-t">
-              <td colspan="4" class="p-2 font-bold">Crédits capitalisés</td>
-              <td class="p-2 text-right font-bold">{{ getBlockCreditsTotalDisplay(block) }}</td>
-              <td></td>
+            <tr class="border-t bg-gray-50">
+              <td colspan="3" class="p-2 font-bold">Crédits capitalisés</td>
+              <td colspan="2" class="p-2 text-right font-bold">{{ getBlockCreditsTotalDisplay(block) }}</td>
             </tr>
-            <tr class="border-t">
-              <td colspan="4" class="p-2 font-bold">Moyenne {{ block.semesterLabel || '' }}</td>
-              <td class="p-2 text-right font-bold">{{ getBlockAverage(block) }}</td>
-              <td></td>
+            <tr class="border-t bg-gray-50">
+              <td colspan="3" class="p-2 font-bold">Moyenne {{ block.semesterLabel || '' }}</td>
+              <td colspan="2" class="p-2 text-right font-bold">{{ getBlockAverage(block) }}</td>
+            </tr>
+            <tr class="border-t bg-gray-50" v-if="block.summary">
+              <td colspan="3" class="p-2 font-bold">Décision</td>
+              <td colspan="2" class="p-2 text-right font-bold" :class="block.summary.decision === 'Admis' ? 'text-green-700' : 'text-red-700'">
+                {{ block.summary.decision }}
+              </td>
             </tr>
           </tfoot>
         </table>
       </div>
 
       <div v-if="isL2View && selectedS4Option" class="mb-6 p-4 bg-white rounded border border-gray-100 shadow-sm">
-        <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between mb-3">
-          <div>
-            <h3 class="text-lg font-semibold">Notes S4 — {{ currentS4OptionLabel }}</h3>
-            <p class="text-sm text-gray-500">Affichage limité à l'étudiant sélectionné.</p>
-          </div>
-          <div class="text-sm text-gray-600 flex flex-wrap gap-4">
-            <span>Moyenne option: <strong>{{ formatGrade(s4StudentAverage) }}</strong></span>
-            <span v-if="hasS4Decision">Décision S4: <strong :class="s4DecisionClass">{{ s4DecisionLabel }}</strong></span>
-          </div>
+        <div class="mb-3">
+          <h3 class="text-lg font-semibold">Notes S4 — {{ currentS4OptionLabel }}</h3>
+          <p class="text-sm text-gray-500">Affichage limité à l'étudiant sélectionné.</p>
         </div>
         <div v-if="loadingS4Option" class="text-sm text-gray-500">Chargement des notes de l'option…</div>
         <div v-else-if="s4OptionError" class="text-sm text-red-600">{{ s4OptionError }}</div>
@@ -120,9 +113,19 @@
               </tr>
             </tbody>
             <tfoot>
-              <tr class="border-t">
-                <td colspan="4" class="p-2 font-bold">Crédits capitalisés</td>
-                <td class="p-2 text-right font-bold">{{ levelS4OptionCreditsDisplay }}</td>
+              <tr class="border-t bg-gray-50">
+                <td colspan="3" class="p-2 font-bold">Crédits capitalisés</td>
+                <td colspan="2" class="p-2 text-right font-bold">{{ levelS4OptionCreditsDisplay }}</td>
+              </tr>
+              <tr class="border-t bg-gray-50">
+                <td colspan="3" class="p-2 font-bold">Moyenne option</td>
+                <td colspan="2" class="p-2 text-right font-bold">{{ formatGrade(s4StudentAverage) }}</td>
+              </tr>
+              <tr class="border-t bg-gray-50" v-if="hasS4Decision">
+                <td colspan="3" class="p-2 font-bold">Décision S4</td>
+                <td colspan="2" class="p-2 text-right font-bold" :class="s4DecisionClass">
+                  {{ s4DecisionLabel }}
+                </td>
               </tr>
             </tfoot>
           </table>
@@ -232,7 +235,28 @@ const levelSummaryRows = computed(() => {
   return rows
 })
 
-const levelDecision = computed(() => computeLevelDecisionBlocks(levelSummarySourceBlocks()))
+const levelDecision = computed(() => {
+  // Utiliser les moyennes déjà calculées pour chaque semestre
+  const rows = levelSummaryRows.value
+  let sum = 0
+  let count = 0
+  
+  for (const row of rows) {
+    if (row.average != null && !Number.isNaN(row.average)) {
+      sum += row.average
+      count++
+    }
+  }
+  
+  const average = count > 0 ? Math.round((sum / count) * 100) / 100 : null
+  
+  // Vérifier les décisions individuelles pour la décision globale
+  const hasAjourne = rows.some(row => row.decision === 'Ajourné')
+  const decision = hasAjourne || average == null || average < 10 ? 'Ajourné' : 'Admis'
+  
+  return { average, decision, compensated: new Set() }
+})
+
 const levelDecisionDisplay = computed(() => {
   const avg = levelDecision.value?.average
   return avg == null ? '—' : avg.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })

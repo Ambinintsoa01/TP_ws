@@ -42,6 +42,18 @@ public class StudentNotesController {
         this.gradeRepository = gradeRepository;
     }
 
+    @GetMapping("/{studentId}")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getStudentInfo(@PathVariable("studentId") Long studentId) {
+        Student student = studentService.requireStudent(studentId);
+        Map<String, Object> data = new HashMap<>();
+        data.put("id", student.getId());
+        data.put("firstName", student.getFirstName());
+        data.put("lastName", student.getLastName());
+        data.put("birthDate", student.getBirthDate());
+        data.put("program", student.getProgram() != null ? student.getProgram().getLabel() : null);
+        return ResponseEntity.ok(ApiResponse.success(data));
+    }
+
     @GetMapping("/{studentId}/averages")
     public ResponseEntity<ApiResponse<Map<String, Double>>> getStudentAverages(@PathVariable("studentId") Long studentId) {
         Student student = studentService.requireStudent(studentId);

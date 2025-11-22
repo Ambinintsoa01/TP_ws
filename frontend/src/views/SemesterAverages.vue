@@ -5,7 +5,7 @@
 
     <div v-if="loading">Chargement des moyennes...</div>
 
-    <div v-else>
+    <div v-else class="p-4 bg-white rounded border border-gray-100 shadow-sm">
       <table class="w-full table-auto border-collapse">
         <thead>
           <tr class="bg-gray-100">
@@ -757,9 +757,9 @@ function openStudent(row) {
 function openStudentFull(studentId, studentName) {
   if (!studentId) return
   router.push({
-    name: 'student-notes-level',
-    params: { id: studentId, level: 'L2' },
-    query: { name: studentName, view: 'full', from: label }
+    name: 'student-profile',
+    params: { id: studentId },
+    query: { name: studentName }
   })
 }
 

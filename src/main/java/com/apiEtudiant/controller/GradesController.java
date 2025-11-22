@@ -68,6 +68,14 @@ public class GradesController {
         // 1) load credits (subjects) for the option
         List<Credit> credits = creditRepository.findByOptionId(optionId);
         List<Subject> subjects = credits.stream().map(Credit::getSubject).collect(Collectors.toList());
+        
+        // Create a map of subject ID to credits
+        Map<Long, Long> subjectCreditsMap = new java.util.HashMap<>();
+        for (Credit credit : credits) {
+            if (credit.getSubject() != null && credit.getSubject().getId() != null) {
+                subjectCreditsMap.put(credit.getSubject().getId(), credit.getCredits());
+            }
+        }
 
         List<com.apiEtudiant.entity.OptionalGroupSubject> optSubjects = optionalGroupSubjectRepository.findByOptionalGroup_Semester_Id(semesterId);
         Map<Long, Long> subjectOptionalGroupIds = new java.util.HashMap<>();
@@ -88,6 +96,7 @@ public class GradesController {
                 Long optGroupId = subjectOptionalGroupIds.get(sub.getId());
                 m.put("optionalGroupId", optGroupId);
                 m.put("optionalInSemester", optGroupId != null);
+                m.put("credits", subjectCreditsMap.get(sub.getId()));
                 return m;
             })
             .collect(Collectors.toList());
