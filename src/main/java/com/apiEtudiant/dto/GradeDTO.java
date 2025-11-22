@@ -7,17 +7,19 @@ public class GradeDTO {
     private Long subjectId;
     private String subjectCode;
     private String subjectTitle;
+    private Long academicYearSemesterId;
     private String semesterLabel;
     private LocalDate sessionDate;
     private Float grade;
 
     public GradeDTO() {}
 
-    public GradeDTO(Long gradeId, Long subjectId, String subjectCode, String subjectTitle, String semesterLabel, LocalDate sessionDate, Float grade) {
+    public GradeDTO(Long gradeId, Long subjectId, String subjectCode, String subjectTitle, Long academicYearSemesterId, String semesterLabel, LocalDate sessionDate, Float grade) {
         this.gradeId = gradeId;
         this.subjectId = subjectId;
         this.subjectCode = subjectCode;
         this.subjectTitle = subjectTitle;
+        this.academicYearSemesterId = academicYearSemesterId;
         this.semesterLabel = semesterLabel;
         this.sessionDate = sessionDate;
         this.grade = grade;
@@ -33,6 +35,8 @@ public class GradeDTO {
     public void setSubjectTitle(String subjectTitle) { this.subjectTitle = subjectTitle; }
     public String getSemesterLabel() { return semesterLabel; }
     public void setSemesterLabel(String semesterLabel) { this.semesterLabel = semesterLabel; }
+    public Long getAcademicYearSemesterId() { return academicYearSemesterId; }
+    public void setAcademicYearSemesterId(Long academicYearSemesterId) { this.academicYearSemesterId = academicYearSemesterId; }
     public LocalDate getSessionDate() { return sessionDate; }
     public void setSessionDate(LocalDate sessionDate) { this.sessionDate = sessionDate; }
     public Float getGrade() { return grade; }

@@ -8,6 +8,16 @@ const apiClient = axios.create({
 });
 
 apiClient.interceptors.request.use((config) => {
+  // Attach auth token if present
+  try {
+    const token = localStorage.getItem('token')
+    if (token) {
+      config.headers['X-Auth-Token'] = token
+    }
+  } catch (e) {
+    // ignore (localStorage not available in some contexts)
+  }
+
   if (config.data instanceof FormData) {
     delete config.headers["Content-Type"];
     console.log("API POST (FormData) →", config.url, {

@@ -124,6 +124,31 @@
                     <Eye class="w-4 h-4" />
                     <span>Détails</span>
                   </button>
+                  <button class="action-btn" @click.stop="openLevelForStudent(student, 'L1')" title="Voir L1 (S1+S2)">
+                    <span class="text-xs font-semibold">L1</span>
+                  </button>
+                  <button class="action-btn" @click.stop="openLevelForStudent(student, 'L2')" title="Voir L2 (S3+S4)">
+                    <span class="text-xs font-semibold">L2</span>
+                  </button>
+                  <div class="relative">
+                    <button class="action-btn action-btn-options" @click.stop="toggleOptionMenu(student.id)" title="Options S4">
+                      <span class="text-xs font-semibold">Options</span>
+                    </button>
+                    <div v-if="optionMenuStudent === student.id" class="option-menu-panel">
+                      <p class="option-menu-title">Accès rapide S4</p>
+                      <button
+                        v-for="opt in s4Options"
+                        :key="opt.id"
+                        class="option-menu-item"
+                        @click.stop="openStudentOption(student, opt.id)"
+                      >
+                        {{ opt.label }}
+                      </button>
+                      <router-link class="option-menu-link" :to="{ name: 'options' }" @click="optionMenuStudent = null">
+                        Vue agrégée par option
+                      </router-link>
+                    </div>
+                  </div>
                 </div>
               </td>
             </tr>
@@ -153,12 +178,18 @@ import {
   Users, UserPlus, Download, Search, Filter, RefreshCw,
   User, BookOpen, Eye, GraduationCap, CheckCircle
 } from 'lucide-vue-next'
+import { useRouter } from 'vue-router'
 import studentService from '../services/studentService'
+import notesService from '../services/notesService'
+
+const router = useRouter()
 
 const students = ref([])
 const loading = ref(true)
 const searchQuery = ref('')
 const totalNotes = ref(0)
+const s4Options = ref([])
+const optionMenuStudent = ref(null)
 
 const filteredStudents = computed(() => {
   if (!searchQuery.value) return students.value
@@ -184,19 +215,51 @@ async function load() {
   }
 }
 
+async function loadOptions() {
+  try {
+    const resp = await notesService.getOptions()
+    s4Options.value = (resp || []).filter(opt => opt.id !== 1)
+  } catch (e) {
+    console.error('Unable to fetch options', e)
+    s4Options.value = []
+  }
+}
+
 function viewNotes(student) {
   // Navigate to notes view for this student
   console.log('View notes for:', student)
-  // TODO: Implement navigation to notes page
+  router.push({ name: 'student-notes-semester', params: { id: student.id, semester: 'S1' }, query: { name: `${student.firstName} ${student.lastName}` } })
 }
 
 function viewDetails(student) {
   // Show student details
   console.log('View details for:', student)
-  // TODO: Implement details modal or page
+  router.push({ path: `/students/${student.id}`, query: { name: `${student.firstName} ${student.lastName}` } })
 }
 
-onMounted(load)
+function openLevelForStudent(student, level) {
+  if (!student || !student.id) return
+  router.push({ name: 'student-notes-level', params: { id: student.id, level }, query: { name: `${student.firstName} ${student.lastName}` } })
+}
+
+function toggleOptionMenu(studentId) {
+  optionMenuStudent.value = optionMenuStudent.value === studentId ? null : studentId
+}
+
+function openStudentOption(student, optionId) {
+  if (!student || !student.id || !optionId) return
+  router.push({
+    name: 'student-notes-semester',
+    params: { id: student.id, semester: 'S4' },
+    query: { name: `${student.firstName} ${student.lastName}`, option: optionId }
+  })
+  optionMenuStudent.value = null
+}
+
+onMounted(() => {
+  load()
+  loadOptions()
+})
 </script>
 
 <style scoped>
@@ -355,6 +418,26 @@ onMounted(load)
 
 .action-btn-details {
   @apply bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100 hover:border-gray-300;
+}
+
+.action-btn-options {
+  @apply bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100 hover:border-indigo-300;
+}
+
+.option-menu-panel {
+  @apply absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-xl z-10 p-2 space-y-1;
+}
+
+.option-menu-title {
+  @apply text-xs font-semibold text-gray-500 uppercase tracking-wide px-2;
+}
+
+.option-menu-item {
+  @apply w-full text-left px-2 py-1 rounded-md text-sm text-gray-700 hover:bg-indigo-50;
+}
+
+.option-menu-link {
+  @apply block text-center text-xs font-semibold text-indigo-700 px-2 py-1 rounded-md hover:bg-indigo-50;
 }
 
 .loading-state {
